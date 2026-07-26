@@ -9,6 +9,7 @@ import {
   CloudSun,
   Compass,
   Copy,
+  ExternalLink,
   Footprints,
   Heart,
   Home,
@@ -56,6 +57,8 @@ type TripItem = {
   done: boolean;
   favorite: boolean;
   color: string;
+  sourceLabel?: string;
+  sourceUrl?: string;
 };
 
 type TripDay = {
@@ -89,186 +92,233 @@ type TripData = {
 };
 
 const DEFAULT_TRIP: TripData = {
-  destination: "厦门 · 泉州",
-  subtitle: "在海风与古城之间，慢慢走，认真吃。",
-  dates: "2026.08.15 — 08.18",
-  budget: 6000,
+  destination: "北京 · 古城周末",
+  subtitle: "从前门到故宫，在夏日古都里走一条松弛的中轴线。",
+  dates: "周六 — 周日",
+  budget: 4000,
   updatedAt: 1,
-  notes: "想看一次鼓浪屿的日落。泉州那天记得穿舒服的鞋，晚上去吃面线糊。",
+  notes:
+    "前门尽量早逛，避开中午暑热和最大客流。国博只精选“古代中国”与一个专题展，结束后回酒店休息一小时。周日故宫从午门进入、神武门出，顺路登景山。",
   days: [
     {
-      id: "day-1",
-      label: "DAY 01",
-      date: "08 / 15",
-      city: "厦门",
-      theme: "抵达 · 城市初见",
-      weather: "29° 晴间多云",
+      id: "saturday",
+      label: "周六",
+      date: "SAT",
+      city: "北京",
+      theme: "前门 · 国博 · 夜晚剧场",
+      weather: "夏日 · 注意防暑",
       items: [
         {
-          id: "i-1",
-          time: "10:30",
-          duration: "1h 10m",
-          title: "抵达厦门北站",
-          location: "厦门北站 · 集美区",
-          type: "交通",
-          notes: "提前在 12306 候车室碰面，出站后直接打车去酒店。",
-          distance: "28 km",
-          cost: 86,
-          booked: true,
-          done: false,
-          favorite: false,
-          color: "#324e5f",
-        },
-        {
-          id: "i-2",
-          time: "13:00",
-          duration: "1h 30m",
-          title: "沙坡尾 · 午后散步",
-          location: "大学路 31 号",
+          id: "sat-1",
+          time: "08:30",
+          duration: "至 10:40",
+          title: "前门街区晨间散步",
+          location: "酒店 → 鲜鱼口 → 前门大街 → 大栅栏 → 北京坊",
           type: "漫步",
-          notes: "沿避风坞慢慢走，经过艺术西区和老巷子，找一家靠窗的咖啡店。",
-          distance: "3.2 km",
-          cost: 68,
+          notes: "尽量早逛，避开中午暑热和最大客流；从酒店步行串联几个街区。",
+          distance: "约 4 km",
+          cost: 0,
           booked: false,
           done: false,
           favorite: true,
           color: "#c85d3e",
         },
         {
-          id: "i-3",
-          time: "17:40",
-          duration: "2h",
-          title: "环岛路骑行看日落",
-          location: "黄厝海滩",
-          type: "体验",
-          notes: "从曾厝垵往黄厝方向骑，日落前 30 分钟到海边。备一件薄外套。",
-          distance: "8.6 km",
-          cost: 45,
+          id: "sat-2",
+          time: "11:00",
+          duration: "至 12:30",
+          title: "全聚德前门店午餐",
+          location: "全聚德前门店",
+          type: "餐饮",
+          notes: "两人建议点“半只烤鸭＋一两个菜”，给晚上的 ZENG 留足胃口。",
+          distance: "步行可达",
+          cost: 520,
           booked: false,
           done: false,
           favorite: false,
           color: "#d6a446",
         },
+        {
+          id: "sat-3",
+          time: "12:30",
+          duration: "至 13:30",
+          title: "前往国博 · 安检排队",
+          location: "前门 → 中国国家博物馆",
+          type: "交通",
+          notes: "为步行、寄存、安检和暑期排队完整预留一小时，不压缩参观时间。",
+          distance: "约 2 km",
+          cost: 0,
+          booked: false,
+          done: false,
+          favorite: false,
+          color: "#324e5f",
+        },
+        {
+          id: "sat-4",
+          time: "13:30",
+          duration: "至 16:30",
+          title: "中国国家博物馆",
+          location: "天安门广场东侧",
+          type: "景点",
+          notes:
+            "三个小时只精选“古代中国”＋一个感兴趣的专题展，不追求全馆打卡。暑期开放至 17:30，16:30 停止入馆。",
+          distance: "馆内步行",
+          cost: 0,
+          booked: true,
+          done: false,
+          favorite: true,
+          color: "#1e4a3b",
+          sourceLabel: "中国国家博物馆官网",
+          sourceUrl: "https://www.chnmuseum.cn/",
+        },
+        {
+          id: "sat-5",
+          time: "16:30",
+          duration: "至 18:00",
+          title: "返回酒店休息",
+          location: "国家博物馆 → 酒店",
+          type: "住宿",
+          notes: "不要继续硬逛。回酒店休息、洗漱一小时非常值得，也为晚餐恢复体力。",
+          distance: "按酒店位置",
+          cost: 0,
+          booked: false,
+          done: false,
+          favorite: false,
+          color: "#6d5b8c",
+        },
+        {
+          id: "sat-6",
+          time: "18:30",
+          duration: "以后",
+          title: "ZENG 餐厅剧场店",
+          location: "ZENG 餐厅剧场店",
+          type: "餐饮",
+          notes: "轻松享用晚餐与剧场体验，白天午餐控制分量后会更舒服。",
+          distance: "打车前往",
+          cost: 680,
+          booked: true,
+          done: false,
+          favorite: true,
+          color: "#c85d3e",
+        },
       ],
     },
     {
-      id: "day-2",
-      label: "DAY 02",
-      date: "08 / 16",
-      city: "厦门",
-      theme: "海岛 · 日落收集",
-      weather: "28° 多云",
+      id: "sunday",
+      label: "周日",
+      date: "SUN",
+      city: "北京",
+      theme: "故宫 · 景山 · 什刹海",
+      weather: "夏日 · 注意防晒",
       items: [
         {
-          id: "i-4",
-          time: "08:10",
-          duration: "4h",
-          title: "鼓浪屿散步地图",
-          location: "三丘田码头",
+          id: "sun-1",
+          time: "08:00",
+          duration: "左右",
+          title: "从酒店出发",
+          location: "酒店 → 故宫午门",
+          type: "交通",
+          notes: "提前准备好证件、预约信息和饮水，留出前往午门及排队时间。",
+          distance: "按酒店位置",
+          cost: 20,
+          booked: false,
+          done: false,
+          favorite: false,
+          color: "#324e5f",
+        },
+        {
+          id: "sun-2",
+          time: "08:30",
+          duration: "至 13:30",
+          title: "故宫博物院",
+          location: "午门 → 中轴线 → 东西六宫择一侧 → 御花园",
           type: "景点",
-          notes: "从三丘田上岛，先走最美转角，再去八卦楼和日光岩。",
-          distance: "6.8 km",
-          cost: 180,
+          notes:
+            "旺季 08:30 开放、17:00 闭馆。从午门进入，最后由神武门离开，直接衔接景山最顺路。",
+          distance: "约 6 km",
+          cost: 120,
           booked: true,
+          done: false,
+          favorite: true,
+          color: "#c85d3e",
+          sourceLabel: "故宫参观信息",
+          sourceUrl: "https://www.dpm.org.cn/Visit.html",
+        },
+        {
+          id: "sun-3",
+          time: "13:30",
+          duration: "至 14:00",
+          title: "故宫内简单补给",
+          location: "御花园附近",
+          type: "餐饮",
+          notes: "简单吃点、补水并稍作休息，不安排正式午餐，避免行程被拖慢。",
+          distance: "馆内",
+          cost: 80,
+          booked: false,
+          done: false,
+          favorite: false,
+          color: "#d6a446",
+        },
+        {
+          id: "sun-4",
+          time: "14:00",
+          duration: "至 15:15",
+          title: "景山公园 · 万春亭",
+          location: "神武门 → 景山公园",
+          type: "景点",
+          notes: "从神武门出，过街进入景山公园，登万春亭俯瞰故宫全景。",
+          distance: "约 1.5 km",
+          cost: 10,
+          booked: false,
           done: false,
           favorite: true,
           color: "#1e4a3b",
         },
         {
-          id: "i-5",
+          id: "sun-5",
           time: "15:30",
-          duration: "2h",
-          title: "中山路觅食",
-          location: "中山路步行街",
+          duration: "至 16:30",
+          title: "咖啡店休息避暑",
+          location: "景山西侧或什刹海附近",
           type: "餐饮",
-          notes: "花生汤、海蛎煎、沙茶面各选一家，两个人分着吃。",
-          distance: "2.1 km",
-          cost: 128,
+          notes: "完整坐下一小时，补水降温，等最热的时段过去再继续步行。",
+          distance: "约 1 km",
+          cost: 100,
           booked: false,
           done: false,
           favorite: false,
-          color: "#c85d3e",
-        },
-      ],
-    },
-    {
-      id: "day-3",
-      label: "DAY 03",
-      date: "08 / 17",
-      city: "泉州",
-      theme: "古城 · 一半烟火一半仙",
-      weather: "30° 晴",
-      items: [
-        {
-          id: "i-6",
-          time: "09:00",
-          duration: "1h",
-          title: "动车前往泉州",
-          location: "厦门北 → 泉州",
-          type: "交通",
-          notes: "车票开售后立即购买，选相邻座位。",
-          distance: "82 km",
-          cost: 78,
-          booked: false,
-          done: false,
-          favorite: false,
-          color: "#324e5f",
-        },
-        {
-          id: "i-7",
-          time: "11:00",
-          duration: "5h",
-          title: "泉州古城漫游",
-          location: "开元寺 · 西街 · 钟楼",
-          type: "景点",
-          notes: "从开元寺开始，沿西街一路吃到钟楼，傍晚去天台看古城。",
-          distance: "7.3 km",
-          cost: 150,
-          booked: false,
-          done: false,
-          favorite: true,
           color: "#d6a446",
         },
-      ],
-    },
-    {
-      id: "day-4",
-      label: "DAY 04",
-      date: "08 / 18",
-      city: "泉州",
-      theme: "清晨 · 带故事回家",
-      weather: "29° 阵雨",
-      items: [
         {
-          id: "i-8",
-          time: "08:30",
-          duration: "2h",
-          title: "蟳埔村簪花围",
-          location: "蟳埔民俗文化村",
-          type: "体验",
-          notes: "早点到避开人流，提前一天确认预约和服装。",
-          distance: "10 km",
-          cost: 298,
+          id: "sun-6",
+          time: "16:30",
+          duration: "至 19:30",
+          title: "什刹海 · 烟袋斜街 · 鼓楼",
+          location: "什刹海 → 烟袋斜街 → 鼓楼",
+          type: "漫步",
+          notes: "沿水边和胡同慢慢走，傍晚光线更舒服，途中顺便解决晚饭。",
+          distance: "约 5 km",
+          cost: 280,
           booked: false,
           done: false,
           favorite: true,
-          color: "#c85d3e",
+          color: "#324e5f",
         },
       ],
     },
   ],
   expenses: [
-    { id: "e-1", name: "往返动车票", category: "交通", amount: 986, paidBy: "阿澈" },
-    { id: "e-2", name: "厦门海边民宿 · 2晚", category: "住宿", amount: 1088, paidBy: "小满" },
-    { id: "e-3", name: "鼓浪屿船票", category: "体验", amount: 140, paidBy: "阿澈" },
-    { id: "e-4", name: "泉州古城酒店", category: "住宿", amount: 468, paidBy: "小满" },
-    { id: "e-5", name: "沙坡尾下午茶", category: "餐饮", amount: 126, paidBy: "阿澈" },
+    { id: "e-1", name: "北京周末酒店", category: "住宿", amount: 1298, paidBy: "周文龙" },
+    { id: "e-2", name: "全聚德前门店午餐", category: "餐饮", amount: 520, paidBy: "吴志宏" },
+    { id: "e-3", name: "ZENG 餐厅剧场", category: "餐饮", amount: 680, paidBy: "周文龙" },
+    { id: "e-4", name: "故宫与景山门票", category: "体验", amount: 130, paidBy: "吴志宏" },
+    { id: "e-5", name: "市内交通预留", category: "交通", amount: 200, paidBy: "周文龙" },
   ],
   checklist: [
-    { id: "c-1", text: "预订鼓浪屿船票", done: true },
-    { id: "c-2", text: "购买泉州动车票", done: false },
-    { id: "c-3", text: "预约簪花围写真", done: false },
-    { id: "c-4", text: "准备防晒与雨伞", done: true },
+    { id: "c-1", text: "预约中国国家博物馆", done: false },
+    { id: "c-2", text: "预约故宫门票", done: false },
+    { id: "c-3", text: "确认 ZENG 餐厅剧场预订", done: false },
+    { id: "c-4", text: "准备证件、防晒与饮水", done: false },
   ],
 };
 
@@ -440,7 +490,7 @@ export function TripPlanner() {
       name: String(form.get("name") || "新费用"),
       category: String(form.get("category") || "餐饮") as Expense["category"],
       amount: Number(form.get("amount") || 0),
-      paidBy: String(form.get("paidBy") || "阿澈"),
+      paidBy: String(form.get("paidBy") || "周文龙"),
     };
     updateTrip((current) => ({
       ...current,
@@ -452,9 +502,9 @@ export function TripPlanner() {
 
   function copyShareCode() {
     navigator.clipboard
-      ?.writeText("MANXING-0815")
+      ?.writeText("BEIJING-WEEKEND")
       .then(() => showToast("共享码已复制"))
-      .catch(() => showToast("共享码：MANXING-0815"));
+      .catch(() => showToast("共享码：BEIJING-WEEKEND"));
   }
 
   function renderSchedule(showHeader = true): ReactNode {
@@ -552,6 +602,17 @@ export function TripPlanner() {
                   <span><Footprints size={12} />{item.distance}</span>
                   <span><CircleDollarSign size={12} />{money(item.cost)}</span>
                   {item.booked && <span><Ticket size={12} />已预订</span>}
+                  {item.sourceUrl && (
+                    <a
+                      className="source-link"
+                      href={item.sourceUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <ExternalLink size={11} />
+                      {item.sourceLabel}
+                    </a>
+                  )}
                 </div>
               </div>
             </article>
@@ -570,7 +631,7 @@ export function TripPlanner() {
       <div className={large ? "map-view-card" : ""}>
         <div className="map-card">
           <div className="map-toolbar">
-            <strong>海岸路线</strong>
+            <strong>北京中轴线</strong>
             <button
               aria-label="打开地点地图"
               className="icon-button"
@@ -581,14 +642,14 @@ export function TripPlanner() {
             </button>
           </div>
           <div className="map-route" />
-          <button aria-label="沙坡尾" className="map-pin one" type="button"><span>1</span></button>
-          <button aria-label="鼓浪屿" className="map-pin two" type="button"><span>2</span></button>
-          <button aria-label="环岛路" className="map-pin three" type="button"><span>3</span></button>
-          <button aria-label="泉州古城" className="map-pin four" type="button"><span>4</span></button>
+          <button aria-label="前门" className="map-pin one" type="button"><span>1</span></button>
+          <button aria-label="国家博物馆" className="map-pin two" type="button"><span>2</span></button>
+          <button aria-label="故宫" className="map-pin three" type="button"><span>3</span></button>
+          <button aria-label="什刹海" className="map-pin four" type="button"><span>4</span></button>
           <div className="map-caption">
             <div>
               <strong>{allPlaces.length} 个心动地点</strong>
-              <small>厦门 → 泉州 · 约 126 km</small>
+              <small>前门 → 国博 → 故宫 → 什刹海</small>
             </div>
             <Compass size={18} />
           </div>
@@ -602,14 +663,14 @@ export function TripPlanner() {
       <>
         <section className="hero">
           <div className="hero-ribbon" />
-          <div className="eyebrow"><span className="eyebrow-line" />SUMMER ESCAPE · 2026</div>
-          <h1>去闽南，<em>吹海风。</em></h1>
+          <div className="eyebrow"><span className="eyebrow-line" />BEIJING WEEKEND · 2026</div>
+          <h1>去北京，<em>逛古都。</em></h1>
           <p className="hero-copy">{trip.subtitle}</p>
           <div className="hero-bottom">
             <div className="hero-stats">
-              <div className="hero-stat"><span>日期</span><strong>08.15 — 18</strong></div>
+              <div className="hero-stat"><span>日期</span><strong>周六 — 周日</strong></div>
               <div className="hero-stat"><span>同行</span><strong>2 人</strong></div>
-              <div className="hero-stat"><span>目的地</span><strong>2 城</strong></div>
+              <div className="hero-stat"><span>路线</span><strong>中轴线</strong></div>
             </div>
             <div className="hero-actions">
               <button className="ghost-button light" onClick={() => setModal("share")} type="button">
@@ -858,8 +919,8 @@ export function TripPlanner() {
         </div>
 
         <div className="sidebar-footer">
-          <span className="avatar online">澈</span>
-          <div className="profile-copy"><strong>阿澈</strong><small>行程创建者</small></div>
+          <span className="avatar online">龙</span>
+          <div className="profile-copy"><strong>周文龙</strong><small>行程创建者</small></div>
         </div>
       </aside>
 
@@ -867,7 +928,7 @@ export function TripPlanner() {
         <header className="topbar">
           <div className="sync-pill">
             <span className={`sync-dot ${saving ? "saving" : ""}`} />
-            {saving ? "正在同步" : "已与小满同步"}
+            {saving ? "正在同步" : "已与吴志宏同步"}
           </div>
           <button
             aria-label="刷新同步"
@@ -884,8 +945,8 @@ export function TripPlanner() {
             <Share2 size={15} />
           </button>
           <div className="member-group" aria-label="同行成员">
-            <span className="avatar online">澈</span>
-            <span className="avatar alt online">满</span>
+            <span className="avatar online">龙</span>
+            <span className="avatar alt online">宏</span>
           </div>
         </header>
 
@@ -967,9 +1028,9 @@ export function TripPlanner() {
               <Field label="金额" name="amount" placeholder="0" required type="number" />
               <div className="field wide">
                 <label htmlFor="paidBy">付款人</label>
-                <select defaultValue="阿澈" id="paidBy" name="paidBy">
-                  <option value="阿澈">阿澈</option>
-                  <option value="小满">小满</option>
+                <select defaultValue="周文龙" id="paidBy" name="paidBy">
+                  <option value="周文龙">周文龙</option>
+                  <option value="吴志宏">吴志宏</option>
                 </select>
               </div>
             </div>
@@ -989,12 +1050,12 @@ export function TripPlanner() {
         >
           <div className="share-code">
             <small>TRIP SHARE CODE</small>
-            <strong>MANXING-0815</strong>
+            <strong>BEIJING-WEEKEND</strong>
           </div>
           <div className="share-members">
             <div className="member-group">
-              <span className="avatar online">澈</span>
-              <span className="avatar alt online">满</span>
+              <span className="avatar online">龙</span>
+              <span className="avatar alt online">宏</span>
             </div>
             <small>2 位成员 · 均可编辑</small>
           </div>

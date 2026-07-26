@@ -714,6 +714,22 @@ a {
   gap: 5px;
 }
 
+.source-link {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  color: var(--clay);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .item-actions {
   display: flex;
   gap: 3px;
@@ -766,22 +782,23 @@ a {
   border-radius: var(--radius-lg);
   color: var(--ink);
   background:
-    linear-gradient(36deg, transparent 47%, rgba(30, 74, 59, 0.07) 48% 51%, transparent 52%),
-    linear-gradient(120deg, transparent 47%, rgba(30, 74, 59, 0.06) 48% 50%, transparent 51%),
-    #dfe9df;
+    repeating-linear-gradient(28deg, transparent 0 42px, rgba(30, 74, 59, 0.07) 43px 45px),
+    repeating-linear-gradient(112deg, transparent 0 62px, rgba(200, 93, 62, 0.05) 63px 65px),
+    #e7e1d4;
   box-shadow: var(--shadow);
 }
 
 .map-card::before {
   content: "";
   position: absolute;
-  width: 210px;
-  height: 330px;
-  right: -72px;
-  top: -30px;
-  border-radius: 48% 0 0 54%;
-  background: #bdd7de;
-  transform: rotate(-8deg);
+  width: 230px;
+  height: 150px;
+  right: -46px;
+  top: 82px;
+  border: 10px double rgba(30, 74, 59, 0.13);
+  border-radius: 54% 46% 60% 40%;
+  background: #c7d5c4;
+  transform: rotate(-12deg);
 }
 
 .map-toolbar {
@@ -1233,8 +1250,9 @@ a {
   display: block;
   margin-top: 8px;
   font-family: Georgia, serif;
-  font-size: 28px;
+  font-size: clamp(18px, 5vw, 28px);
   letter-spacing: 0.14em;
+  overflow-wrap: anywhere;
 }
 
 .share-members {

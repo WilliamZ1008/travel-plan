@@ -9,8 +9,10 @@ test("contains the finished travel planner product surface", async () => {
   );
 
   assert.match(planner, /漫行/);
-  assert.match(planner, /去闽南/);
-  assert.match(planner, /厦门 · 泉州/);
+  assert.match(planner, /去北京/);
+  assert.match(planner, /北京 · 古城周末/);
+  assert.match(planner, /周文龙/);
+  assert.match(planner, /吴志宏/);
   assert.match(planner, /旅程首页/);
   assert.match(planner, /每日行程/);
   assert.match(planner, /共同预算/);

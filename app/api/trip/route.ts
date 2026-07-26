@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readTrip, writeTrip } from "../../../db/trip-store";
 
 export async function GET() {
-  const stored = await readTrip("coast-2026");
+  const stored = await readTrip("beijing-weekend-2026");
   if (!stored) {
     return NextResponse.json({ trip: null, version: 0 });
   }
@@ -29,6 +29,6 @@ export async function PUT(request: Request) {
       ? body.trip.updatedAt
       : Date.now();
 
-  await writeTrip("coast-2026", serialized, updatedAt);
+  await writeTrip("beijing-weekend-2026", serialized, updatedAt);
   return NextResponse.json({ ok: true, updatedAt });
 }
