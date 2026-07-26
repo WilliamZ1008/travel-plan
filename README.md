@@ -1,98 +1,81 @@
-# vinext-starter
+# 漫行 · 北京周末旅行计划
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+为周文龙与吴志宏设计的双人旅行计划网页。项目采用 React、TypeScript、
+Vite 与 CloudBase Web SDK，可直接构建为纯静态文件并部署到腾讯云
+CloudBase 静态网站托管。
 
-## Prerequisites
-
-- Node.js `>=22.13.0`
-
-## Quick Start
+## 本地运行
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
-npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+未填写 CloudBase 环境 ID 时，网页仍可正常运行，修改会保存在浏览器的
+`localStorage` 中。填写环境变量后，会使用 CloudBase 文档数据库保存并实时
+同步两位同游人的修改。
 
-## Included Shape
+## CloudBase 环境变量
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+```dotenv
+VITE_CLOUDBASE_ENV_ID=你的环境ID
+VITE_CLOUDBASE_REGION=ap-shanghai
+VITE_CLOUDBASE_ACCESS_KEY=
+VITE_BASE_PATH=./
+```
 
-## Workspace Auth Headers
+- `VITE_CLOUDBASE_ENV_ID`：必填，在 CloudBase 环境概览中复制。
+- `VITE_CLOUDBASE_REGION`：按环境地域填写，上海环境保持默认值即可。
+- `VITE_CLOUDBASE_ACCESS_KEY`：可选。使用 Web 安全来源与匿名登录时可留空；
+  如果控制台要求 Publishable Key，则填写公开访问 Key，不能填写腾讯云
+  `SecretId` 或 `SecretKey`。
+- `VITE_BASE_PATH`：保持 `./` 即可同时兼容根目录与 `/travel-plan` 子目录部署。
+  如果需要生成绝对资源路径，也可明确填写 `/` 或 `/travel-plan/`。
 
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
+## CloudBase 控制台准备
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+1. 在身份认证中启用“匿名登录”。
+2. 在安全来源/安全域名中添加静态托管域名和自定义域名；本地开发可添加
+   `localhost`。
+3. 创建文档数据库集合 `travel_plans`。
+4. 为 `travel_plans` 配置以下最小可用安全规则：
 
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
+```json
+{
+  "read": "auth != null",
+  "write": "auth != null"
 }
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+网页首次打开会自动创建固定文档 `beijing-weekend-2026`，后续通过实时监听
+同步修改。
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+> 匿名登录适合这个低风险的双人行程场景，但共享码会出现在前端代码中，
+> 不能当作强密码。如果页面包含证件、订单号或精确实时位置，应改用手机号/
+> 微信登录，并在安全规则中校验两位成员的用户 UID。
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+## CloudBase 静态网页部署参数
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+| 配置项 | 填写内容 |
+| --- | --- |
+| 项目框架 | 其他 |
+| 运行时环境 | Node.js 18 |
+| 目标目录 | `./` |
+| 安装命令 | `npm ci` |
+| 构建命令 | `npm run build` |
+| 构建产物目录 | `./dist` |
+| 部署路径 | `/travel-plan`（与你当前配置一致） |
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+项目默认生成相对资源路径，因此部署到 `/travel-plan` 不需要额外修改公共路径。
+如果以后把部署路径改成 `/`，同一套配置也可以直接使用。
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+## 验证
 
-## Useful Commands
+```bash
+npm run check
+npm test
+```
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+`npm test` 会重新构建并确认产物中只有可被静态托管的 HTML、CSS、JavaScript
+与公共资源，不依赖 Node.js 服务端或 `/api` 路由。

@@ -301,6 +301,16 @@ a {
   animation: pulse 1.2s ease infinite;
 }
 
+.sync-dot.local {
+  background: #8a928b;
+  box-shadow: none;
+}
+
+.sync-dot.error {
+  background: var(--clay);
+  box-shadow: 0 0 0 4px rgba(200, 93, 62, 0.12);
+}
+
 .icon-button {
   width: 38px;
   height: 38px;

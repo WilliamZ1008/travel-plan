@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Bell,
   CalendarDays,
@@ -39,6 +37,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  loadTrip,
+  saveTrip,
+  subscribeTrip,
+  type SyncMode,
+} from "./lib/trip-storage";
 
 type View = "overview" | "itinerary" | "map" | "budget";
 type Modal = "item" | "expense" | "share" | null;
@@ -349,6 +353,8 @@ export function TripPlanner() {
   const [activeDayId, setActiveDayId] = useState(DEFAULT_TRIP.days[0].id);
   const [hydrated, setHydrated] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [syncMode, setSyncMode] = useState<SyncMode>("local");
+  const [syncError, setSyncError] = useState("");
   const [toast, setToast] = useState("");
   const tripRef = useRef(trip);
 
@@ -369,15 +375,21 @@ export function TripPlanner() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/trip")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.trip) {
-          setTrip(data.trip);
-          setActiveDayId(data.trip.days?.[0]?.id ?? DEFAULT_TRIP.days[0].id);
+    loadTrip(DEFAULT_TRIP)
+      .then(({ error, mode, trip: loadedTrip }) => {
+        if (!cancelled) {
+          setTrip(loadedTrip);
+          setActiveDayId(loadedTrip.days?.[0]?.id ?? DEFAULT_TRIP.days[0].id);
+          setSyncMode(mode);
+          setSyncError(error ?? "");
         }
       })
-      .catch(() => undefined)
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setSyncMode("error");
+          setSyncError(error instanceof Error ? error.message : "初始化同步失败");
+        }
+      })
       .finally(() => {
         if (!cancelled) setHydrated(true);
       });
@@ -389,12 +401,15 @@ export function TripPlanner() {
   useEffect(() => {
     if (!hydrated) return;
     const timer = window.setTimeout(() => {
-      fetch("/api/trip", {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ trip }),
-      })
-        .catch(() => undefined)
+      saveTrip(trip)
+        .then((mode) => {
+          setSyncMode(mode);
+          setSyncError("");
+        })
+        .catch((error: unknown) => {
+          setSyncMode("error");
+          setSyncError(error instanceof Error ? error.message : "CloudBase 保存失败");
+        })
         .finally(() => setSaving(false));
     }, 650);
     return () => window.clearTimeout(timer);
@@ -402,18 +417,31 @@ export function TripPlanner() {
 
   useEffect(() => {
     if (!hydrated) return;
-    const interval = window.setInterval(() => {
-      fetch("/api/trip")
-        .then((response) => (response.ok ? response.json() : null))
-        .then((data) => {
-          if (data?.trip?.updatedAt > tripRef.current.updatedAt) {
-            setTrip(data.trip);
-            showToast("已同步搭档的最新修改");
-          }
-        })
-        .catch(() => undefined);
-    }, 10_000);
-    return () => window.clearInterval(interval);
+    let cancelled = false;
+    let stopWatching: (() => void) | undefined;
+
+    void subscribeTrip<TripData>(
+      (remoteTrip) => {
+        if (remoteTrip.updatedAt > tripRef.current.updatedAt) {
+          setTrip(remoteTrip);
+          showToast("已同步吴志宏的最新修改");
+        }
+        setSyncMode("cloud");
+        setSyncError("");
+      },
+      (error) => {
+        setSyncMode("error");
+        setSyncError(error.message);
+      },
+    ).then((cleanup) => {
+      if (cancelled) cleanup();
+      else stopWatching = cleanup;
+    });
+
+    return () => {
+      cancelled = true;
+      stopWatching?.();
+    };
   }, [hydrated]);
 
   function showToast(message: string) {
@@ -926,9 +954,15 @@ export function TripPlanner() {
 
       <main className="main">
         <header className="topbar">
-          <div className="sync-pill">
-            <span className={`sync-dot ${saving ? "saving" : ""}`} />
-            {saving ? "正在同步" : "已与吴志宏同步"}
+          <div className="sync-pill" title={syncError || undefined}>
+            <span className={`sync-dot ${saving ? "saving" : syncMode}`} />
+            {saving
+              ? "正在同步"
+              : syncMode === "cloud"
+                ? "已与吴志宏实时同步"
+                : syncMode === "error"
+                  ? "同步异常 · 本地已保存"
+                  : "本地预览 · 待配置 CloudBase"}
           </div>
           <button
             aria-label="刷新同步"
