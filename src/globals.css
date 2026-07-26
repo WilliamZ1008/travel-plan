@@ -172,6 +172,20 @@ a {
   letter-spacing: 0.12em;
 }
 
+.sidebar-trip strong {
+  display: block;
+  margin-top: 12px;
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 14px;
+}
+
+.sidebar-trip small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .mini-route {
   display: flex;
   align-items: center;
@@ -838,32 +852,57 @@ a {
   box-shadow: 0 8px 18px rgba(29, 41, 37, 0.18);
 }
 
-.map-pin {
+.map-marker {
   position: absolute;
   z-index: 3;
-  width: 31px;
-  height: 31px;
-  border: 3px solid white;
-  border-radius: 50% 50% 50% 8px;
+  left: var(--marker-left);
+  top: var(--marker-top);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transform: translate(-11px, -11px);
+}
+
+.map-marker-pin {
+  flex: 0 0 auto;
+  width: 23px;
+  height: 23px;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 7px;
   display: grid;
   place-items: center;
   color: white;
-  background: var(--clay);
-  box-shadow: 0 8px 16px rgba(57, 69, 61, 0.2);
+  background: var(--marker-color, var(--clay));
+  box-shadow: 0 6px 14px rgba(29, 41, 37, 0.22);
   transform: rotate(-45deg);
-  cursor: pointer;
-}
-
-.map-pin span {
-  transform: rotate(45deg);
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 800;
 }
 
-.map-pin.one { left: 48%; top: 72%; }
-.map-pin.two { left: 57%; top: 61%; background: var(--green); }
-.map-pin.three { left: 48%; top: 40%; background: var(--gold); }
-.map-pin.four { left: 27%; top: 22%; background: var(--navy); }
+.map-marker-pin > span {
+  transform: rotate(45deg);
+}
+
+.map-marker strong {
+  max-width: 88px;
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 7px;
+  overflow: hidden;
+  color: var(--ink);
+  background: rgba(251, 248, 241, 0.88);
+  box-shadow: 0 4px 10px rgba(29, 41, 37, 0.12);
+  backdrop-filter: blur(7px);
+  font-size: 8px;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.map-marker.label-left {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 11px), -11px);
+}
 
 .map-route {
   position: absolute;
@@ -986,12 +1025,6 @@ a {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 12px;
-}
-
-.view-actions {
-  display: flex;
-  align-items: center;
-  gap: 9px;
 }
 
 .wide-layout {

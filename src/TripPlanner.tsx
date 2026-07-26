@@ -100,6 +100,88 @@ type TripData = {
   checklist: { id: string; text: string; done: boolean }[];
 };
 
+type MapPlace = {
+  id: string;
+  name: string;
+  detail: string;
+  day: string;
+  color: string;
+  left: string;
+  top: string;
+  labelSide?: "left";
+};
+
+const TRIP_START_DATE = "2026-08-01";
+
+const mapPlaces: MapPlace[] = [
+  {
+    id: "drum-tower",
+    name: "鼓楼",
+    detail: "北京鼓楼",
+    day: "周日",
+    color: "#324e5f",
+    left: "50%",
+    top: "13%",
+    labelSide: "left",
+  },
+  {
+    id: "shichahai",
+    name: "什刹海",
+    detail: "什刹海 · 烟袋斜街",
+    day: "周日",
+    color: "#324e5f",
+    left: "28%",
+    top: "25%",
+  },
+  {
+    id: "jingshan",
+    name: "景山公园",
+    detail: "万春亭",
+    day: "周日",
+    color: "#1e4a3b",
+    left: "50%",
+    top: "31%",
+    labelSide: "left",
+  },
+  {
+    id: "forbidden-city",
+    name: "故宫",
+    detail: "午门至神武门",
+    day: "周日",
+    color: "#d6a446",
+    left: "50%",
+    top: "45%",
+  },
+  {
+    id: "national-museum",
+    name: "国家博物馆",
+    detail: "天安门广场东侧",
+    day: "周六",
+    color: "#1e4a3b",
+    left: "58%",
+    top: "58%",
+  },
+  {
+    id: "qianmen",
+    name: "前门大街",
+    detail: "鲜鱼口 · 大栅栏 · 北京坊",
+    day: "周六",
+    color: "#c85d3e",
+    left: "49%",
+    top: "68%",
+    labelSide: "left",
+  },
+  {
+    id: "quanjude",
+    name: "全聚德前门店",
+    detail: "前门大街 30 号",
+    day: "周六",
+    color: "#c85d3e",
+    left: "55%",
+    top: "76%",
+  },
+];
+
 const DEFAULT_TRIP: TripData = {
   destination: "北京 · 古城周末",
   subtitle: "从前门到故宫，在夏日古都里走一条松弛的中轴线。",
@@ -350,6 +432,18 @@ const itemColors: Record<string, string> = {
 
 function money(value: number) {
   return `¥${value.toLocaleString("zh-CN")}`;
+}
+
+function departureCountdown(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const departure = Date.UTC(year, month - 1, day);
+  const days = Math.round((departure - today) / 86_400_000);
+
+  if (days > 0) return `还有 ${days} 天出发`;
+  if (days === 0) return "今天出发";
+  return "旅程已开始";
 }
 
 export function TripPlanner() {
@@ -725,14 +819,28 @@ export function TripPlanner() {
             </a>
           </div>
           <div className="map-route" />
-          <button aria-label="前门" className="map-pin one" type="button"><span>1</span></button>
-          <button aria-label="国家博物馆" className="map-pin two" type="button"><span>2</span></button>
-          <button aria-label="故宫" className="map-pin three" type="button"><span>3</span></button>
-          <button aria-label="什刹海" className="map-pin four" type="button"><span>4</span></button>
+          {mapPlaces.map((place, index) => (
+            <div
+              aria-label={`${index + 1}，${place.name}`}
+              className={`map-marker ${place.labelSide === "left" ? "label-left" : ""}`}
+              key={place.id}
+              role="img"
+              style={
+                {
+                  "--marker-color": place.color,
+                  "--marker-left": place.left,
+                  "--marker-top": place.top,
+                } as CSSProperties
+              }
+            >
+              <span className="map-marker-pin"><span>{index + 1}</span></span>
+              <strong>{place.name}</strong>
+            </div>
+          ))}
           <div className="map-caption">
             <div>
-              <strong>{allPlaces.length} 个心动地点</strong>
-              <small>前门 → 国博 → 故宫 → 什刹海</small>
+              <strong>{mapPlaces.length} 个地图地点</strong>
+              <small>前门 → 国博 → 故宫 → 景山 → 什刹海</small>
             </div>
             <Compass size={18} />
           </div>
@@ -868,15 +976,15 @@ export function TripPlanner() {
                 <div className="section-kicker">Saved places</div>
                 <h2 className="section-title">路线上的地点</h2>
               </div>
-              <span className="trip-type">{allPlaces.length} 个</span>
+              <span className="trip-type">{mapPlaces.length} 个</span>
             </div>
             <div className="place-list">
-              {allPlaces.slice(0, 8).map((item, index) => (
-                <div className="place-row" key={item.id}>
-                  <span className="place-index" style={{ background: item.color }}>{index + 1}</span>
+              {mapPlaces.map((place, index) => (
+                <div className="place-row" key={place.id}>
+                  <span className="place-index" style={{ background: place.color }}>{index + 1}</span>
                   <div>
-                    <strong>{item.title}</strong>
-                    <small>{item.day.label} · {item.location}</small>
+                    <strong>{place.name}</strong>
+                    <small>{place.day} · {place.detail}</small>
                   </div>
                   <ChevronRight size={14} style={{ marginLeft: "auto", color: "#8a928b" }} />
                 </div>
@@ -898,14 +1006,9 @@ export function TripPlanner() {
             <h1>共同预算</h1>
             <p>花在哪里，两个人都清清楚楚。</p>
           </div>
-          <div className="view-actions">
-            <button className="ghost-button" onClick={toggleBudgetVisibility} type="button">
-              <EyeOff size={15} /><span>隐藏预算</span>
-            </button>
-            <button className="primary-button" onClick={() => setModal("expense")} type="button">
-              <Plus size={15} /><span>记一笔</span>
-            </button>
-          </div>
+          <button className="primary-button" onClick={() => setModal("expense")} type="button">
+            <Plus size={15} /><span>记一笔</span>
+          </button>
         </div>
         <div className="wide-layout">
           <section className="section-card section-pad">
@@ -1011,7 +1114,7 @@ export function TripPlanner() {
             <Navigation size={14} />
           </div>
           <strong>{trip.destination}</strong>
-          <small>还有 20 天出发</small>
+          <small>{departureCountdown(TRIP_START_DATE)}</small>
         </div>
 
         <div className="sidebar-footer">

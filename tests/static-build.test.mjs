@@ -40,6 +40,11 @@ test("ships the Beijing itinerary and CloudBase persistence", async () => {
   assert.match(planner, /removeItem/);
   assert.match(planner, /removeExpense/);
   assert.match(planner, /toggleBudgetVisibility/);
+  assert.match(planner, /TRIP_START_DATE = "2026-08-01"/);
+  assert.match(planner, /const mapPlaces: MapPlace\[\] = \[/);
+  assert.match(planner, /mapPlaces\.length} 个地图地点/);
+  assert.doesNotMatch(planner, /还有 20 天出发/);
+  assert.doesNotMatch(planner, /隐藏预算<\/span>/);
   assert.match(
     planner,
     /https:\/\/wia\.amap\.com\/#\/map\?orgId=10017639980195568214&workMapId=1763998222564620/,
