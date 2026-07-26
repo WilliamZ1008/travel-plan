@@ -21,6 +21,7 @@ test("builds a CloudBase-compatible static website", async () => {
     access(new URL("../dist/favicon.svg", import.meta.url)),
     access(new URL("../dist/manifest.webmanifest", import.meta.url)),
     access(new URL("../dist/og.png", import.meta.url)),
+    access(new URL("../dist/beijing-map-art.jpg", import.meta.url)),
   ]);
 });
 
@@ -36,5 +37,12 @@ test("ships the Beijing itinerary and CloudBase persistence", async () => {
   assert.match(planner, /故宫博物院/);
   assert.match(storage, /travel_plans/);
   assert.match(storage, /\.watch\(/);
+  assert.match(planner, /removeItem/);
+  assert.match(planner, /removeExpense/);
+  assert.match(planner, /toggleBudgetVisibility/);
+  assert.match(
+    planner,
+    /https:\/\/wia\.amap\.com\/#\/map\?orgId=10017639980195568214&workMapId=1763998222564620/,
+  );
   assert.doesNotMatch(planner, /\/api\/trip/);
 });

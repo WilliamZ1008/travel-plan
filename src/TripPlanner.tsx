@@ -7,6 +7,8 @@ import {
   CloudSun,
   Compass,
   Copy,
+  Eye,
+  EyeOff,
   ExternalLink,
   Footprints,
   Heart,
@@ -24,6 +26,7 @@ import {
   Sparkles,
   Ticket,
   TrainFront,
+  Trash2,
   Utensils,
   WalletCards,
   X,
@@ -43,6 +46,7 @@ import {
   subscribeTrip,
   type SyncMode,
 } from "./lib/trip-storage";
+import beijingMapArt from "/beijing-map-art.jpg";
 
 type View = "overview" | "itinerary" | "map" | "budget";
 type Modal = "item" | "expense" | "share" | null;
@@ -88,6 +92,7 @@ type TripData = {
   subtitle: string;
   dates: string;
   budget: number;
+  budgetVisible?: boolean;
   updatedAt: number;
   notes: string;
   days: TripDay[];
@@ -100,6 +105,7 @@ const DEFAULT_TRIP: TripData = {
   subtitle: "从前门到故宫，在夏日古都里走一条松弛的中轴线。",
   dates: "周六 — 周日",
   budget: 4000,
+  budgetVisible: true,
   updatedAt: 1,
   notes:
     "前门尽量早逛，避开中午暑热和最大客流。国博只精选“古代中国”与一个专题展，结束后回酒店休息一小时。周日故宫从午门进入、神武门出，顺路登景山。",
@@ -368,6 +374,10 @@ export function TripPlanner() {
     () => trip.days.flatMap((day) => day.items.map((item) => ({ ...item, day }))),
     [trip.days],
   );
+  const budgetVisible = trip.budgetVisible !== false;
+  const visibleNavItems = budgetVisible
+    ? navItems
+    : navItems.filter((item) => item.id !== "budget");
 
   useEffect(() => {
     tripRef.current = trip;
@@ -469,6 +479,18 @@ export function TripPlanner() {
     }));
   }
 
+  function removeItem(item: TripItem) {
+    if (!window.confirm(`确定删除“${item.title}”吗？`)) return;
+    updateTrip((current) => ({
+      ...current,
+      days: current.days.map((day) => ({
+        ...day,
+        items: day.items.filter((candidate) => candidate.id !== item.id),
+      })),
+    }));
+    showToast("行程已删除");
+  }
+
   function toggleChecklist(id: string) {
     updateTrip((current) => ({
       ...current,
@@ -526,6 +548,27 @@ export function TripPlanner() {
     }));
     setModal(null);
     showToast("费用已记录");
+  }
+
+  function removeExpense(expense: Expense) {
+    if (!window.confirm(`确定删除“${expense.name}”这笔费用吗？`)) return;
+    updateTrip((current) => ({
+      ...current,
+      expenses: current.expenses.filter(
+        (candidate) => candidate.id !== expense.id,
+      ),
+    }));
+    showToast("费用已删除");
+  }
+
+  function toggleBudgetVisibility() {
+    const nextVisible = !budgetVisible;
+    updateTrip((current) => ({
+      ...current,
+      budgetVisible: nextVisible,
+    }));
+    if (!nextVisible) setView("overview");
+    showToast(nextVisible ? "共同预算已显示" : "共同预算已隐藏");
   }
 
   function copyShareCode() {
@@ -623,6 +666,14 @@ export function TripPlanner() {
                     >
                       <Check size={15} />
                     </button>
+                    <button
+                      aria-label={`删除${item.title}`}
+                      className="tiny-button danger"
+                      onClick={() => removeItem(item)}
+                      type="button"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
                 {item.notes && <p className="trip-note">{item.notes}</p>}
@@ -657,17 +708,21 @@ export function TripPlanner() {
   function renderMiniMap(large = false) {
     return (
       <div className={large ? "map-view-card" : ""}>
-        <div className="map-card">
+        <div
+          className="map-card"
+          style={{ "--map-image": `url(${beijingMapArt})` } as CSSProperties}
+        >
           <div className="map-toolbar">
             <strong>北京中轴线</strong>
-            <button
-              aria-label="打开地点地图"
+            <a
+              aria-label="在高德地图打开路线"
               className="icon-button"
-              onClick={() => setView("map")}
-              type="button"
+              href="https://wia.amap.com/#/map?orgId=10017639980195568214&workMapId=1763998222564620"
+              rel="noreferrer"
+              target="_blank"
             >
               <Navigation size={15} />
-            </button>
+            </a>
           </div>
           <div className="map-route" />
           <button aria-label="前门" className="map-pin one" type="button"><span>1</span></button>
@@ -843,9 +898,14 @@ export function TripPlanner() {
             <h1>共同预算</h1>
             <p>花在哪里，两个人都清清楚楚。</p>
           </div>
-          <button className="primary-button" onClick={() => setModal("expense")} type="button">
-            <Plus size={15} /><span>记一笔</span>
-          </button>
+          <div className="view-actions">
+            <button className="ghost-button" onClick={toggleBudgetVisibility} type="button">
+              <EyeOff size={15} /><span>隐藏预算</span>
+            </button>
+            <button className="primary-button" onClick={() => setModal("expense")} type="button">
+              <Plus size={15} /><span>记一笔</span>
+            </button>
+          </div>
         </div>
         <div className="wide-layout">
           <section className="section-card section-pad">
@@ -865,6 +925,14 @@ export function TripPlanner() {
                   </div>
                   <span className="expense-amount">{money(expense.amount)}</span>
                   <span className="paid-chip">{expense.paidBy} 已付</span>
+                  <button
+                    aria-label={`删除${expense.name}`}
+                    className="expense-delete"
+                    onClick={() => removeExpense(expense)}
+                    type="button"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -919,7 +987,7 @@ export function TripPlanner() {
 
         <div className="nav-label">旅程空间</div>
         <nav className="nav-list" aria-label="主要导航">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -987,11 +1055,14 @@ export function TripPlanner() {
         {view === "overview" && renderOverview()}
         {view === "itinerary" && renderItinerary()}
         {view === "map" && renderMapView()}
-        {view === "budget" && renderBudget()}
+        {view === "budget" && budgetVisible && renderBudget()}
       </main>
 
-      <nav className="mobile-nav" aria-label="移动端导航">
-        {navItems.map((item) => {
+      <nav
+        className={`mobile-nav ${budgetVisible ? "" : "compact"}`}
+        aria-label="移动端导航"
+      >
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <button
@@ -1093,6 +1164,23 @@ export function TripPlanner() {
             </div>
             <small>2 位成员 · 均可编辑</small>
           </div>
+          <button
+            aria-pressed={budgetVisible}
+            className="setting-toggle"
+            onClick={toggleBudgetVisibility}
+            type="button"
+          >
+            <span className="setting-toggle-icon">
+              {budgetVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+            </span>
+            <span>
+              <strong>共同预算</strong>
+              <small>{budgetVisible ? "显示在导航中" : "已从导航中隐藏"}</small>
+            </span>
+            <span className={`switch-track ${budgetVisible ? "on" : ""}`}>
+              <span />
+            </span>
+          </button>
           <div className="modal-actions">
             <button className="ghost-button" onClick={() => setModal(null)} type="button">完成</button>
             <button className="primary-button" onClick={copyShareCode} type="button"><Copy size={14} />复制共享码</button>
